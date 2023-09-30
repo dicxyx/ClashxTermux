@@ -1,0 +1,87 @@
+port: 7890
+socks-port: 7891
+redir-port: 7892
+mixed-port: 7893
+mode: rule
+log-level: silent
+allow-lan: true
+external-controller: 0.0.0.0:9090
+bind-address: "*"
+ipv6: false
+dns:
+  enable: true
+  ipv6: false
+  enhanced-mode: redir-host
+  listen: 0.0.0.0:7894
+  fallback-filter:
+    geoip: false
+    ipcidr:
+    - 240.0.0.0/4
+  nameserver:
+    - https://cloudflare-dns.com/dns-query
+    - https://dns.google/dns-query
+    - tls://1.1.1.1:853
+    - tls://8.8.8.8:853
+  fallback:
+    - tcp://1.1.1.1
+    - tcp://8.8.8.8
+    - 1.1.1.1
+    - 8.8.8.8
+tun:
+  enable: true
+  stack: system 
+  macOS-auto-route: true
+  macOS-auto-detect-interface: true
+  dns-hijack:
+    - tcp://8.8.8.8:53
+experimental:
+  interface-name: en0
+  
+proxy-providers:
+  Bestping:
+    type: http
+    path: "./bestping.yaml"
+    url: https://raw.githubusercontent.com/dicxyx/ulton/main/pp/Bestping
+    health-check:
+      enable: true
+      url: http://www.gstatic.com/generate_204
+      interval: 100
+  Eppong:
+    type: http
+    path: "./eppong.yaml"
+    url: https://raw.githubusercontent.com/dicxyx/ulton/main/pp/Eppong
+    health-check:
+      enable: true
+      url: http://www.gstatic.com/generate_204
+      interval: 100
+  Batik:
+    type: http
+    path: "./batik.yaml"
+    url: https://raw.githubusercontent.com/dicxyx/ulton/main/pp/Batik
+    health-check:
+      enable: true
+      url: http://www.gstatic.com/generate_204
+      interval: 100
+          
+proxy-groups:
+  - name: BEST PING
+    type: url-test
+    url: 'http://www.gstatic.com/generate_204'
+    interval: 300
+    use:
+      - Bestping
+  - name: EPPONG
+    type: select
+    url: 'http://www.gstatic.com/generate_204'
+    interval: 100
+    use:
+      - Eppong
+  - name: BATIK
+    type: select
+    url: 'http://www.gstatic.com/generate_204'
+    interval: 300
+    use:
+      - Batik
+rules:
+ - IP-CIDR,198.18.0.1/16,REJECT,no-resolve
+ - MATCH,GLOBAL
